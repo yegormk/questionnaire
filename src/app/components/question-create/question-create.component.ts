@@ -1,8 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
-import { localStorageService } from '../../services/local-storage.service';
 import { IOption } from '../../interfaces/question.interfaces';
+import * as questionsActions from '../../store/questions.actions';
+import { Store } from '@ngrx/store';
+import { IAppState } from '../../interfaces/app-state.interfaces';
+import { routerManagement } from '../../services/router-management.service';
+
+enum TypeOfQuestion {
+  Open = 'Open',
+  Single = 'Single',
+  Multiple = 'Multiple',
+}
 
 @Component({
   selector: 'app-question-create',
@@ -12,7 +26,7 @@ import { IOption } from '../../interfaces/question.interfaces';
 export class QuestionCreateComponent implements OnInit {
   createQuestionForm!: FormGroup;
 
-  constructor(private service: localStorageService) {}
+  constructor(private router: routerManagement, private store: Store<IAppState>) {}
 
   ngOnInit(): void {
     this.createQuestionForm = new FormGroup({
@@ -27,7 +41,7 @@ export class QuestionCreateComponent implements OnInit {
       this.listOfOptions.removeAt(0);
     }
     this.addOption('correct');
-    if (event.target.value !== 'Open') {
+    if (event.target.value !== TypeOfQuestion['Open']) {
       this.addOption('wrong');
     }
   }
@@ -58,8 +72,20 @@ export class QuestionCreateComponent implements OnInit {
     return this.listOfOptions.value.filter((x: IOption) => !x.isRight).length;
   }
 
+  get isSingle(): boolean {
+    return this.createQuestionForm.controls['typeOfQuestion'].value === TypeOfQuestion['Single'];
+  }
+
+  get isMultiple(): boolean {
+    return this.createQuestionForm.controls['typeOfQuestion'].value === TypeOfQuestion['Multiple'];
+  }
+
+  get isOpen(): boolean {
+    return this.createQuestionForm.controls['typeOfQuestion'].value === TypeOfQuestion['Open'];
+  }
+
   previousPage() {
-    this.service.moveTo('');
+    this.router.moveTo('');
   }
 
   onSubmit(): void {
@@ -67,12 +93,16 @@ export class QuestionCreateComponent implements OnInit {
       return;
     }
 
-    this.service.setQuestionCard({
-      question: this.createQuestionForm.value.question,
-      typeOfQuestion: this.createQuestionForm.value.typeOfQuestion,
-      listOfOptions: this.listOfOptions.value,
-      isAnswered: false,
-      dateOfCreation: new Date(),
-    });
+    this.store.dispatch(
+      questionsActions.addQuestion({
+        question: {
+          question: this.createQuestionForm.value.question,
+          typeOfQuestion: this.createQuestionForm.value.typeOfQuestion,
+          listOfOptions: this.listOfOptions.value,
+          isAnswered: false,
+          dateOfCreation: new Date(),
+        },
+      })
+    );
   }
 }

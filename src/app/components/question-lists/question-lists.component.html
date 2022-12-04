@@ -1,7 +1,7 @@
 <div class="wrapper">
-  <div class="wrapper-columns">
+  <div class="wrapper-columns" *ngIf="questionCards$ | async as questionsInfo">
     <div class="unanswered">
-      <div class="wrapper-single-list" *ngFor="let card of questionCards; index as idx">
+      <div class="wrapper-single-list" *ngFor="let card of questionsInfo.listOfQuestions; index as index">
         <mat-card class="card" *ngIf="!card.isAnswered">
           <mat-card-content>
             <p class="text-question">{{ card.question }}</p>
@@ -19,8 +19,8 @@
 
               <button
                 class="create-button"
-                [disabled]="!(open.value.length > 1)"
-                (click)="answer(idx, open.value)"
+                [disabled]="!(open.value.length > 0)"
+                (click)="answer(index, open.value, questionsInfo.listOfQuestions)"
                 mat-raised-button
               >Answer</button>
             </div>
@@ -35,7 +35,7 @@
               <button
                 class="create-button"
                 [disabled]="!(answers.selectedOptions.selected.length > 0)"
-                (click)="answer(idx, answers.selectedOptions.selected)"
+                (click)="answer(index, answers.selectedOptions.selected, questionsInfo.listOfQuestions)"
                 mat-raised-button
               >Answer</button>
             </div>
@@ -45,7 +45,7 @@
     </div>
 
     <div class="answered">
-      <div class="wrapper-single-list" *ngFor="let card of questionCards; index as idx">
+      <div class="wrapper-single-list" *ngFor="let card of questionsInfo.listOfQuestions; index as index">
         <mat-card class="card" *ngIf="card.isAnswered">
           <mat-card-content>
             <p class="text-question">{{ card.question }}</p>
@@ -86,7 +86,7 @@
             </mat-radio-group>
           </mat-card-actions>
 
-          <button class="create-button" (click)="rollBack(idx)" mat-raised-button>Roll Back</button>
+          <button class="create-button" (click)="rollBack(index, questionsInfo.listOfQuestions)" mat-raised-button>Roll Back</button>
         </mat-card>
       </div>
     </div>

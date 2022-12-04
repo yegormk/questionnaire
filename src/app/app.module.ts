@@ -19,6 +19,12 @@ import { QuestionEditComponent } from './components/question-edit/question-edit.
 import { QuestionListsComponent } from './components/question-lists/question-lists.component';
 import { AppRoutingModule } from './app-routing.module';
 
+import { ActionReducerMap, StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { getQuestionsReducer } from './store/questions.reducers';
+import { questionsEffects } from './store/questions.effects';
+import { IAppState } from './interfaces/app-state.interfaces';
+
 export const materialModules = [
   MatButtonModule,
   MatInputModule,
@@ -29,6 +35,10 @@ export const materialModules = [
   MatListModule,
   MatIconModule,
 ];
+
+const loginReducerMap: ActionReducerMap<IAppState> = {
+  questions: getQuestionsReducer,
+};
 
 @NgModule({
   declarations: [
@@ -44,6 +54,8 @@ export const materialModules = [
     BrowserAnimationsModule,
     AppRoutingModule,
     materialModules,
+    StoreModule.forRoot(loginReducerMap),
+    EffectsModule.forRoot([questionsEffects]),
   ],
   providers: [],
   bootstrap: [AppComponent],
